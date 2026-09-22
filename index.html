@@ -33,6 +33,12 @@
     .kicker{font-size:13px;color:var(--gold);font-weight:900;text-transform:uppercase;letter-spacing:.08em}
     .question{font-size:clamp(21px,4vw,29px);line-height:1.25;margin:9px 0 22px;font-weight:800}
     .helper{color:var(--muted);line-height:1.55}
+    .fields{display:grid;gap:16px;margin-top:20px}
+    .field{display:grid;gap:7px;text-align:left}
+    .field label{font-weight:800;font-size:14px}
+    .field input{width:100%;border:1.5px solid var(--line);border-radius:14px;padding:15px 16px;outline:none;background:#fff;color:var(--text)}
+    .field input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(183,131,37,.10)}
+    .field small{color:var(--muted);line-height:1.4}
     .answers{display:grid;gap:12px}
     .answer{display:flex;align-items:center;gap:13px;border:1.5px solid var(--line);border-radius:16px;padding:17px 18px;cursor:pointer;transition:.2s;background:#fff;font-weight:700}
     .answer:hover{border-color:#d6afb2;background:#fffafa}
@@ -84,8 +90,19 @@
       <div class="screen active" id="intro">
         <div class="kicker">Cuidar do coração começa nas escolhas</div>
         <p class="question">Vamos descobrir como estão alguns dos seus hábitos alimentares?</p>
-        <p class="helper">O resultado é educativo e não substitui avaliação individual realizada por profissional de saúde. O preenchimento pode ser mantido anônimo.</p>
-        <div class="actions"><button class="btn primary" onclick="start()">Começar avaliação</button></div>
+        <p class="helper">O resultado é educativo e não substitui avaliação individual realizada por profissional de saúde. Nome e contato serão registrados junto às respostas para fins desta ação institucional.</p>
+        <div class="fields">
+          <div class="field">
+            <label for="nome">Nome completo</label>
+            <input id="nome" name="nome" type="text" placeholder="Digite seu nome" autocomplete="name" required>
+          </div>
+          <div class="field">
+            <label for="contato">Contato</label>
+            <input id="contato" name="contato" type="tel" placeholder="Telefone ou WhatsApp" autocomplete="tel" required>
+            <small>Informe um contato válido para identificação na ação.</small>
+          </div>
+        </div>
+        <div class="actions"><button class="btn primary" type="button" onclick="start()">Começar avaliação</button></div>
       </div>
 
       <form id="quiz" autocomplete="off">
@@ -166,7 +183,7 @@ questions.forEach((q,i)=>{
       ${i ? '<button type="button" class="btn secondary" onclick="back()">Voltar</button>' : ''}
       <button type="button" class="btn primary next" disabled onclick="${i===questions.length-1?'finish()':'next()'}">${i===questions.length-1?'Ver meu resultado':'Continuar'}</button>
     </div>
-    ${i===0?'<div class="privacy">As respostas podem ser coletadas sem nome. Caso sua instituição opte por coletar setor ou outra informação, informe previamente a finalidade aos participantes.</div>':''}
+    ${i===0?'<div class="privacy">Seus dados de identificação e suas respostas serão registrados para fins desta ação institucional.</div>':''}
   `;
   qWrap.appendChild(el);
   el.querySelectorAll('input').forEach(inp=>{
@@ -186,7 +203,15 @@ function show(id){
 function updateProgress(done){
   document.getElementById('progressBar').style.width = `${(done/questions.length)*100}%`;
 }
-function start(){ current=0; show('q0'); updateProgress(0); }
+function start(){
+  const nome=document.getElementById('nome').value.trim();
+  const contato=document.getElementById('contato').value.trim();
+  if(!nome || !contato){
+    alert('Por favor, preencha seu nome e contato para continuar.');
+    return;
+  }
+  current=0; show('q0'); updateProgress(0);
+}
 function next(){ current++; show('q'+current); updateProgress(current); window.scrollTo({top:0,behavior:'smooth'}); }
 function back(){ current--; show('q'+current); updateProgress(current); }
 
@@ -224,6 +249,8 @@ async function finish(){
   if(SHEETS_ENDPOINT){
     const payload={
       timestamp:new Date().toISOString(),
+      nome:document.getElementById('nome').value.trim(),
+      contato:document.getElementById('contato').value.trim(),
       q1:answers[0], q2:answers[1], q3:answers[2], q4:answers[3], q5:answers[4],
       score, classificacao:label
     };
@@ -234,6 +261,8 @@ async function finish(){
 }
 function restart(){
   answers.fill(null); current=0;
+  document.getElementById('nome').value='';
+  document.getElementById('contato').value='';
   document.querySelectorAll('input[type=radio]').forEach(i=>i.checked=false);
   document.querySelectorAll('.answer').forEach(a=>a.classList.remove('selected'));
   document.querySelectorAll('.next').forEach(b=>b.disabled=true);
