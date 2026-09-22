@@ -1,0 +1,50 @@
+FORMULÁRIO — SETEMBRO VERMELHO
+Hospital Memorial São Francisco
+
+ARQUIVOS
+- index.html: formulário completo.
+- google-apps-script.gs: código para registrar respostas no Google Sheets.
+
+COMO TESTAR O FORMULÁRIO
+1. Abra index.html no navegador.
+2. Responda às cinco perguntas.
+3. Confira o coração e a classificação.
+4. Teste o QR Code e o botão do e-book.
+
+COMO LIGAR AO GOOGLE SHEETS
+1. Crie uma nova planilha no Google Sheets.
+2. Na planilha, abra Extensões > Apps Script.
+3. Apague o conteúdo inicial e cole google-apps-script.gs.
+4. Salve.
+5. Clique em Implantar > Nova implantação.
+6. Escolha "Aplicativo da Web".
+7. Configure para executar como você e permita o acesso necessário para que os colaboradores consigam enviar.
+8. Copie a URL final que termina em /exec.
+9. Abra index.html em um editor de texto.
+10. Procure:
+    const SHEETS_ENDPOINT = '';
+11. Cole a URL entre as aspas.
+12. Salve o arquivo.
+
+PUBLICAÇÃO
+O index.html precisa ser hospedado para virar um link. Pode ser publicado em um serviço de hospedagem estática autorizado pela instituição (por exemplo, a hospedagem que vocês já utilizam para páginas internas/externas).
+
+DADOS COLETADOS
+Por padrão, o formulário NÃO solicita nome, e-mail ou matrícula. A planilha recebe:
+- data/hora;
+- resposta 0/1 de cada pergunta;
+- pontuação total;
+- classificação.
+
+E-BOOK
+Destino configurado no QR Code e no botão:
+https://heyzine.com/flip-book/0e8a2edfd9.html
+
+OBSERVAÇÃO
+Antes da divulgação institucional, valide o texto do instrumento e a forma de coleta/uso dos dados com as áreas responsáveis da instituição.
+
+
+IDENTIDADE VISUAL
+- Logo Grupo Memorial 50 anos incluída no cabeçalho.
+- Dourado usado em detalhes institucionais, mantendo o vermelho como cor principal da campanha.
+- Mantenha o arquivo logo-memorial-50-anos.jpg na mesma pasta do index.html ao publicar.

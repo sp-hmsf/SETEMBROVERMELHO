@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#8f1720">
+  <title>Mini Score de Risco Cardiovascular Alimentar</title>
+  <style>
+    :root{
+      --red:#941d27; --red-dark:#72151d; --red-soft:#f8e9ea;
+      --gold:#b78325; --gold-light:#d6ad61; --gold-soft:#fbf6ea;
+      --text:#292526; --muted:#6e6668; --line:#eadfe0; --bg:#f7f5f4;
+      --green:#2f7d55; --yellow:#c99116; --danger:#b52a34; --white:#fff;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,#f8f5f4 0%,#fff 45%,#f7f5f4 100%);color:var(--text)}
+    button,input{font:inherit}
+    .wrap{min-height:100vh;display:grid;place-items:center;padding:24px}
+    .card{width:min(720px,100%);background:#fff;border:1px solid #eee5e5;border-radius:28px;box-shadow:0 22px 60px rgba(70,24,28,.10);overflow:hidden}
+    .top{padding:22px 28px 18px;background:linear-gradient(135deg,var(--red-dark),var(--red));color:white;position:relative;overflow:hidden}
+    .top:after{content:'';position:absolute;right:-70px;top:-100px;width:220px;height:220px;border:1px solid rgba(214,173,97,.25);border-radius:50%;box-shadow:0 0 0 28px rgba(214,173,97,.06),0 0 0 58px rgba(214,173,97,.04);pointer-events:none}
+    .logo-box{display:inline-flex;align-items:center;background:#fff;border:1px solid rgba(214,173,97,.55);border-radius:16px;padding:8px 14px;margin-bottom:14px;box-shadow:0 7px 22px rgba(48,12,15,.13);position:relative;z-index:1}
+    .logo-box img{display:block;width:min(330px,72vw);height:auto;max-height:74px;object-fit:contain}
+    .gold-line{width:62px;height:3px;border-radius:99px;background:linear-gradient(90deg,var(--gold),var(--gold-light));margin:10px 0 12px}
+    .brand{font-size:12px;letter-spacing:.13em;text-transform:uppercase;opacity:.85;font-weight:800}
+    h1{font-size:clamp(25px,5vw,38px);line-height:1.05;margin:9px 0 8px}
+    .subtitle{margin:0;opacity:.9;line-height:1.5}
+    .progress{height:6px;background:rgba(255,255,255,.2);margin-top:20px;border-radius:99px;overflow:hidden}
+    .progress>div{height:100%;width:0;background:linear-gradient(90deg,var(--gold-light),#f2d99f);border-radius:99px;transition:.35s ease}
+    .content{padding:28px}
+    .screen{display:none;animation:fade .3s ease}.screen.active{display:block}
+    @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+    .kicker{font-size:13px;color:var(--gold);font-weight:900;text-transform:uppercase;letter-spacing:.08em}
+    .question{font-size:clamp(21px,4vw,29px);line-height:1.25;margin:9px 0 22px;font-weight:800}
+    .helper{color:var(--muted);line-height:1.55}
+    .answers{display:grid;gap:12px}
+    .answer{display:flex;align-items:center;gap:13px;border:1.5px solid var(--line);border-radius:16px;padding:17px 18px;cursor:pointer;transition:.2s;background:#fff;font-weight:700}
+    .answer:hover{border-color:#d6afb2;background:#fffafa}
+    .answer input{accent-color:var(--red);width:20px;height:20px}
+    .answer.selected{border-color:var(--gold);background:var(--gold-soft);box-shadow:0 0 0 2px rgba(183,131,37,.08)}
+    .actions{display:flex;gap:10px;justify-content:space-between;margin-top:24px}
+    .btn{border:0;border-radius:14px;padding:14px 18px;font-weight:800;cursor:pointer}
+    .btn.primary{background:var(--red);color:white;flex:1;border-bottom:3px solid var(--gold)}.btn.primary:hover{background:var(--red-dark)}
+    .btn.secondary{background:#f2eeee;color:#544b4c}
+    .btn:disabled{opacity:.45;cursor:not-allowed}
+    .privacy{font-size:12px;color:#817779;margin-top:18px;line-height:1.5}
+    .heart-stage{display:grid;place-items:center;margin:6px 0 18px}
+    .heart-shell{position:relative;width:150px;height:138px;filter:drop-shadow(0 12px 20px rgba(132,25,34,.18));animation:pulse 1.25s ease-in-out infinite}
+    .heart-svg{width:100%;height:100%}
+    .heart-bg{fill:#f0e8e8}.heart-outline{fill:none;stroke:var(--red);stroke-width:6}
+    .heart-fill{fill:var(--red);transition:height .8s ease,y .8s ease}
+    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.045)}}
+    .heart-stage.alert .heart-shell{animation:alert .55s ease-in-out infinite alternate}
+    @keyframes alert{from{transform:rotate(-2deg)}to{transform:rotate(2deg) scale(1.035)}}
+    .badge{display:inline-block;border-radius:999px;padding:8px 13px;font-weight:900;font-size:13px}
+    .low{background:#e8f5ed;color:var(--green)}.medium{background:#fff5d9;color:#8b650c}.high{background:#fde8ea;color:var(--danger)}
+    .result{text-align:center}
+    .score{font-size:18px;font-weight:800;margin:12px 0 5px}
+    .recommendation{max-width:540px;margin:12px auto 24px;color:#5d5557;line-height:1.6}
+    .ebook{border-top:2px solid var(--gold-light);padding:24px 20px 20px;margin-top:12px;background:linear-gradient(180deg,#fff,var(--gold-soft));border-radius:0 0 18px 18px}
+    .ebook h2{font-size:22px;margin:5px 0 7px}
+    .ebook p{color:var(--muted);line-height:1.5}
+    .ebook-grid{display:grid;grid-template-columns:160px 1fr;gap:22px;align-items:center;text-align:left;margin-top:18px}
+    .qr{width:160px;height:160px;border-radius:16px;border:2px solid var(--gold-light);padding:9px;background:white;box-shadow:0 8px 22px rgba(138,94,19,.10)}
+    .ebook .linkbtn{display:inline-block;text-decoration:none;background:var(--red);color:white;padding:14px 18px;border-radius:14px;font-weight:900;margin-top:8px;border-bottom:3px solid var(--gold)}
+    .alertmark{font-size:28px;margin-left:5px;vertical-align:middle}
+    .footer{text-align:center;font-size:12px;color:#897f80;padding:0 28px 24px}
+    @media(max-width:560px){.wrap{padding:0}.card{min-height:100vh;border-radius:0}.top,.content{padding-left:20px;padding-right:20px}.ebook-grid{grid-template-columns:1fr;text-align:center}.qr{margin:auto}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <main class="card">
+    <header class="top">
+      <div class="logo-box"><img src="logo-memorial-50-anos.jpg" alt="Grupo Memorial - 50 anos"></div>
+      <div class="brand">Hospital Memorial São Francisco • Setembro Vermelho</div>
+      <div class="gold-line"></div>
+      <h1>Mini Score de Risco Cardiovascular Alimentar</h1>
+      <p class="subtitle">Responda 5 perguntas rápidas sobre seus hábitos alimentares. Cada resposta <strong>SIM</strong> vale 1 ponto.</p>
+      <div class="progress" aria-label="Progresso"><div id="progressBar"></div></div>
+    </header>
+
+    <section class="content">
+      <div class="screen active" id="intro">
+        <div class="kicker">Cuidar do coração começa nas escolhas</div>
+        <p class="question">Vamos descobrir como estão alguns dos seus hábitos alimentares?</p>
+        <p class="helper">O resultado é educativo e não substitui avaliação individual realizada por profissional de saúde. O preenchimento pode ser mantido anônimo.</p>
+        <div class="actions"><button class="btn primary" onclick="start()">Começar avaliação</button></div>
+      </div>
+
+      <form id="quiz" autocomplete="off">
+        <div id="questions"></div>
+      </form>
+
+      <div class="screen result" id="result">
+        <div class="heart-stage" id="heartStage">
+          <div class="heart-shell" aria-hidden="true">
+            <svg class="heart-svg" viewBox="0 0 200 180">
+              <defs>
+                <clipPath id="heartClip">
+                  <path d="M100 166 C82 146 25 111 20 64 C16 28 57 7 83 28 C91 34 97 43 100 51 C103 43 109 34 117 28 C143 7 184 28 180 64 C175 111 118 146 100 166Z"/>
+                </clipPath>
+              </defs>
+              <path class="heart-bg" d="M100 166 C82 146 25 111 20 64 C16 28 57 7 83 28 C91 34 97 43 100 51 C103 43 109 34 117 28 C143 7 184 28 180 64 C175 111 118 146 100 166Z"/>
+              <rect id="heartFill" class="heart-fill" x="0" y="0" width="200" height="180" clip-path="url(#heartClip)"/>
+              <path class="heart-outline" d="M100 166 C82 146 25 111 20 64 C16 28 57 7 83 28 C91 34 97 43 100 51 C103 43 109 34 117 28 C143 7 184 28 180 64 C175 111 118 146 100 166Z"/>
+            </svg>
+          </div>
+        </div>
+        <div id="riskBadge" class="badge"></div>
+        <div class="score" id="scoreText"></div>
+        <div class="recommendation" id="recommendation"></div>
+
+        <section class="ebook">
+          <div class="kicker">Continue cuidando do seu coração</div>
+          <h2>Alimentação para a Saúde do Coração</h2>
+          <p>Preparamos um e-book com orientações simples para apoiar escolhas alimentares mais saudáveis.</p>
+          <div class="ebook-grid">
+            <img class="qr" alt="QR Code para acessar o e-book" src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https%3A%2F%2Fheyzine.com%2Fflip-book%2F0e8a2edfd9.html">
+            <div>
+              <strong>Aponte a câmera do celular para o QR Code</strong>
+              <p>Ou, se estiver respondendo pelo celular, use o botão abaixo.</p>
+              <a class="linkbtn" href="https://heyzine.com/flip-book/0e8a2edfd9.html" target="_blank" rel="noopener">Acessar o e-book</a>
+            </div>
+          </div>
+        </section>
+        <div class="actions"><button class="btn secondary" onclick="restart()">Refazer avaliação</button></div>
+      </div>
+    </section>
+    <div class="footer">Ação educativa • Setembro Vermelho • Hospital Memorial São Francisco</div>
+  </main>
+</div>
+
+<script>
+const questions = [
+  'Você costuma comer <strong>frituras ou salgadinhos ≥3 vezes por semana?</strong>',
+  'Você costuma consumir <strong>embutidos</strong> (presunto, salsicha, linguiça, salame, mortadela) ≥2 vezes por semana?',
+  'Você consome <strong>refrigerante, suco artificial ou outras bebidas açucaradas</strong> ≥3 vezes por semana?',
+  'Você come <strong>poucas frutas, verduras e legumes</strong> (menos de 3 porções ao dia)?',
+  'Você costuma consumir <strong>muitos alimentos ultraprocessados</strong> (biscoitos, salgadinhos, fast-food, macarrão instantâneo, comidas prontas etc.)?'
+];
+
+const answers = Array(questions.length).fill(null);
+let current = 0;
+
+/*
+  COLE AQUI A URL DO WEB APP DO GOOGLE APPS SCRIPT DEPOIS DE PUBLICÁ-LO.
+  Exemplo: const SHEETS_ENDPOINT = 'https://script.google.com/macros/s/SEU_ID/exec';
+*/
+const SHEETS_ENDPOINT = '';
+
+const qWrap = document.getElementById('questions');
+
+questions.forEach((q,i)=>{
+  const el = document.createElement('div');
+  el.className='screen';
+  el.id='q'+i;
+  el.innerHTML=`
+    <div class="kicker">Pergunta ${i+1} de ${questions.length}</div>
+    <div class="question">${q}</div>
+    <div class="answers">
+      <label class="answer"><input type="radio" name="q${i}" value="0"> Não <span style="margin-left:auto;color:#817779">0 ponto</span></label>
+      <label class="answer"><input type="radio" name="q${i}" value="1"> Sim <span style="margin-left:auto;color:#817779">1 ponto</span></label>
+    </div>
+    <div class="actions">
+      ${i ? '<button type="button" class="btn secondary" onclick="back()">Voltar</button>' : ''}
+      <button type="button" class="btn primary next" disabled onclick="${i===questions.length-1?'finish()':'next()'}">${i===questions.length-1?'Ver meu resultado':'Continuar'}</button>
+    </div>
+    ${i===0?'<div class="privacy">As respostas podem ser coletadas sem nome. Caso sua instituição opte por coletar setor ou outra informação, informe previamente a finalidade aos participantes.</div>':''}
+  `;
+  qWrap.appendChild(el);
+  el.querySelectorAll('input').forEach(inp=>{
+    inp.addEventListener('change',()=>{
+      answers[i]=Number(inp.value);
+      el.querySelectorAll('.answer').forEach(a=>a.classList.remove('selected'));
+      inp.closest('.answer').classList.add('selected');
+      el.querySelector('.next').disabled=false;
+    });
+  });
+});
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function updateProgress(done){
+  document.getElementById('progressBar').style.width = `${(done/questions.length)*100}%`;
+}
+function start(){ current=0; show('q0'); updateProgress(0); }
+function next(){ current++; show('q'+current); updateProgress(current); window.scrollTo({top:0,behavior:'smooth'}); }
+function back(){ current--; show('q'+current); updateProgress(current); }
+
+async function finish(){
+  const score=answers.reduce((a,b)=>a+b,0);
+  let label, rec, cls, fillPct, alert=false;
+  if(score<=1){
+    label='Baixo risco alimentar';
+    rec='Mantenha uma alimentação variada e equilibrada, priorizando alimentos naturais e minimamente processados.';
+    cls='low'; fillPct=100;
+  }else if(score<=3){
+    label='Atenção';
+    rec='Reduza os alimentos de risco e aumente o consumo de frutas, verduras, legumes e outros alimentos naturais.';
+    cls='medium'; fillPct=50;
+  }else{
+    label='Alto risco alimentar';
+    rec='Procure melhorar seus hábitos alimentares e, se possível, faça uma avaliação com um nutricionista para acompanhamento individualizado.';
+    cls='high'; fillPct=8; alert=true;
+  }
+
+  const badge=document.getElementById('riskBadge');
+  badge.className='badge '+cls;
+  badge.innerHTML = label + (alert ? ' <span class="alertmark">⚠</span>' : '');
+  document.getElementById('scoreText').textContent=`Seu resultado: ${score} ${score===1?'ponto':'pontos'} de 5`;
+  document.getElementById('recommendation').textContent=rec;
+
+  const fill=document.getElementById('heartFill');
+  const h=180*(fillPct/100);
+  fill.setAttribute('y',180-h);
+  fill.setAttribute('height',h);
+  document.getElementById('heartStage').classList.toggle('alert',alert);
+
+  show('result'); updateProgress(5); window.scrollTo({top:0,behavior:'smooth'});
+
+  if(SHEETS_ENDPOINT){
+    const payload={
+      timestamp:new Date().toISOString(),
+      q1:answers[0], q2:answers[1], q3:answers[2], q4:answers[3], q5:answers[4],
+      score, classificacao:label
+    };
+    try{
+      await fetch(SHEETS_ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
+    }catch(e){ console.warn('Não foi possível registrar a resposta.',e); }
+  }
+}
+function restart(){
+  answers.fill(null); current=0;
+  document.querySelectorAll('input[type=radio]').forEach(i=>i.checked=false);
+  document.querySelectorAll('.answer').forEach(a=>a.classList.remove('selected'));
+  document.querySelectorAll('.next').forEach(b=>b.disabled=true);
+  show('intro'); updateProgress(0); window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
